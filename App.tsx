@@ -1,59 +1,39 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, Text, View } from "react-native";
+import "react-native-gesture-handler";
 import {
-  GestureDetector,
   Gesture,
+  GestureDetector,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
-  withSpring,
+  useSharedValue,
 } from "react-native-reanimated";
 
-function Ball() {
-  const isPressed = useSharedValue(false);
-  const offset = useSharedValue({ x: 0, y: 0 });
+export default function App() {
+  const scale = useSharedValue(1);
+  const savedScale = useSharedValue(1);
 
-  const animatedStyles = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { translateX: offset.value.x },
-        { translateY: offset.value.y },
-        { scale: withSpring(isPressed.value ? 1.2 : 1) },
-      ],
-      backgroundColor: isPressed.value ? "yellow" : "blue",
-    };
-  });
-
-  const gesture = Gesture.Pan()
-    .onBegin(() => {
-      console.log("begin");
-      isPressed.value = true;
+  const pinchGesture = Gesture.Pinch()
+    .onUpdate((e) => {
+      console.log("update");
+      scale.value = savedScale.value * e.scale;
     })
-    .onChange((e) => {
-      console.log("change");
-      offset.value = {
-        x: e.changeX + offset.value.x,
-        y: e.changeY + offset.value.y,
-      };
-    })
-    .onFinalize(() => {
-      console.log("finalize");
-      isPressed.value = false;
+    .onEnd(() => {
+      console.log("end");
+      savedScale.value = scale.value;
     });
 
-  return (
-    <GestureDetector gesture={gesture}>
-      <Animated.View style={[styles.ball, animatedStyles]} />
-    </GestureDetector>
-  );
-}
-
-export default function App() {
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
   return (
     <GestureHandlerRootView style={styles.container}>
-      <Ball />
+      <GestureDetector gesture={pinchGesture}>
+        <Animated.View style={[styles.view1, animatedStyle]} />
+        {/* <Animated.View style={[styles.view2, animatedStyle]} /> */}
+      </GestureDetector>
     </GestureHandlerRootView>
   );
 }
@@ -61,12 +41,18 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  ball: {
-    width: 100,
-    height: 100,
-    borderRadius: 100,
-    backgroundColor: "blue",
-    alignSelf: "center",
+  view1: {
+    width: 200,
+    height: 200,
+    backgroundColor: "violet",
+  },
+  view2: {
+    width: 200,
+    height: 200,
+    backgroundColor: "green",
   },
 });
