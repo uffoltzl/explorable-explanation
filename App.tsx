@@ -1,58 +1,21 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
-import "react-native-gesture-handler";
-import {
-  Gesture,
-  GestureDetector,
-  GestureHandlerRootView,
-} from "react-native-gesture-handler";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Home } from "./src/Home/Home";
+import { DepthZoom } from "./src/DepthZoom/DepthZoom";
+
+export type RootStackParamList = {
+  Home: undefined;
+  DepthZoom: undefined;
+};
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
-  const scale = useSharedValue(1);
-  const savedScale = useSharedValue(1);
-
-  const pinchGesture = Gesture.Pinch()
-    .onUpdate((e) => {
-      console.log("update");
-      scale.value = savedScale.value * e.scale;
-    })
-    .onEnd(() => {
-      console.log("end");
-      savedScale.value = scale.value;
-    });
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <GestureDetector gesture={pinchGesture}>
-        <Animated.View style={[styles.view1, animatedStyle]} />
-        {/* <Animated.View style={[styles.view2, animatedStyle]} /> */}
-      </GestureDetector>
-    </GestureHandlerRootView>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="DepthZoom" component={DepthZoom} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  view1: {
-    width: 200,
-    height: 200,
-    backgroundColor: "violet",
-  },
-  view2: {
-    width: 200,
-    height: 200,
-    backgroundColor: "green",
-  },
-});
